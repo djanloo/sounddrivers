@@ -1,0 +1,29 @@
+1 card(s) available.
+    index: 0
+	name: <alsa_card.pci-0000_03_00.1>
+	driver: <module-alsa-card.c>
+	owner module: 7
+	properties:
+		alsa.card = "0"
+		alsa.card_name = "HD-Audio Generic"
+		alsa.long_card_name = "HD-Audio Generic at 0xd03c0000 irq 72"
+		alsa.driver_name = "snd_hda_intel"
+		device.bus_path = "pci-0000:03:00.1"
+		sysfs.path = "/devices/pci0000:00/0000:00:08.1/0000:03:00.1/sound/card0"
+		device.bus = "pci"
+		device.vendor.id = "1002"
+		device.vendor.name = "Advanced Micro Devices, Inc. [AMD/ATI]"
+		device.product.id = "1637"
+		device.product.name = "Renoir Radeon High Definition Audio Controller"
+		device.string = "0"
+		device.description = "Renoir Radeon High Definition Audio Controller"
+		module-udev-detect.discovered = "1"
+		device.icon_name = "audio-card-pci"
+	profiles:
+		HiFi: Play HiFi quality Music (priority 8000, available: no)
+		off: Off (priority 0, available: unknown)
+	active profile: <off>
+	ports:
+		[Out] HDMI1: HDMI / DisplayPort 1 Output (priority 1100, latency offset 0 usec, available: no)
+			properties:
+				

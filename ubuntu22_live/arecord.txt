@@ -1,0 +1,4 @@
+**** List of CAPTURE Hardware Devices ****
+card 1: acp [acp], device 0: DMIC capture dmic-hifi-0 []
+  Subdevices: 1/1
+  Subdevice #0: subdevice #0

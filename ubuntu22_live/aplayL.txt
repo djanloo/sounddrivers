@@ -1,0 +1,36 @@
+null
+    Discard all samples (playback) or generate zero samples (capture)
+default
+    Playback/recording through the PulseAudio sound server
+samplerate
+    Rate Converter Plugin Using Samplerate Library
+speexrate
+    Rate Converter Plugin Using Speex Resampler
+jack
+    JACK Audio Connection Kit
+oss
+    Open Sound System
+pulse
+    PulseAudio Sound Server
+upmix
+    Plugin for channel upmix (4,6,8)
+vdownmix
+    Plugin for channel downmix (stereo) with a simple spacialization
+hw:CARD=Generic,DEV=3
+    HD-Audio Generic, HDMI 0
+    Direct hardware device without any conversions
+plughw:CARD=Generic,DEV=3
+    HD-Audio Generic, HDMI 0
+    Hardware device with all software conversions
+hdmi:CARD=Generic,DEV=0
+    HD-Audio Generic, HDMI 0
+    HDMI Audio Output
+dmix:CARD=Generic,DEV=3
+    HD-Audio Generic, HDMI 0
+    Direct sample mixing device
+usbstream:CARD=Generic
+    HD-Audio Generic
+    USB Stream Output
+usbstream:CARD=acp
+    acp
+    USB Stream Output

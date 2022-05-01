@@ -207,6 +207,9 @@ Next step would be to manually do
 to get the mic working. Naturally this entire procedure does not work.
 
 
-12) Completely random uninstalled pipewire
+12) Completely random uninstalled pipewire this apparently uninstalled the ubuntu-desktop package.
+
+Reinstalled pipewire and ubuntu-desktop.
+
 
 

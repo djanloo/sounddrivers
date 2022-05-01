@@ -211,5 +211,18 @@ to get the mic working. Naturally this entire procedure does not work.
 
 Reinstalled pipewire and ubuntu-desktop.
 
+############## DEBIAN #############
+
+Tried deleting all and installing debian (kern5.10, probably too old).
+
+Turns out that non-free firmware is required for network, rtw88 stuff.
+
+I could not reach internet on debian.
+
+alsa was not installed, still aplay and arecord got the same output as on ubuntu 22.04.
+Stats for debian are in debian/stats.
+
+No particular boot error was shown.
+lshw was not installed.
 
 

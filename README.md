@@ -2,6 +2,7 @@
 
 Logbook of my journey towards fixing the Dummy Output audio for my *matebook d15*.
 
+Everything tested since now is listed in `attempts`.
 ## Format
 
 the `stats` folder contains the output of 

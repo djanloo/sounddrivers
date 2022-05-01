@@ -1,0 +1,7 @@
+Installing debian says that network drivers are non-free.
+
+rtw88/rtw8822c_fw.bin
+rtw88/rtw8822c_wow_fw.bin
+
+Debian installer said that it is possible to add the drivers manualy from a usb stick, but i could not figure out how.
+

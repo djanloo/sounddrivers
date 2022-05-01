@@ -1,0 +1,212 @@
+##### HARDWARE COMMANDS
+
+lshw 				[lists hardware (use -short to get less info)]
+
+lspci -nnk 
+
+cat /proc/asound/devices 	[lists all the devices as seen by ALSA (hw:0,0) ]
+
+ls -l /dev/snd 			[lists all sound devices by name]
+
+aplay -l 			[listst alsa available cards]
+
+pacmd list-cards 		[pulseaudio available cards]
+
+################ SYSTEMD ERRORS ###################
+###################################################
+journalctl -b -p err
+
+###################################################
+############### CONFIG FILES ######################
+
+grub:	 	/etc/default/grub
+alsa:	 	/etc/modprobe.d/alsa-base.conf
+pulseaudio:	/etc/pulse/default.pa
+
+##################################################
+
+1) Modified grub defaults file to suite AMD IOMMU 
+
+	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amd_iommu=on iommu=soft"
+
+
+2) Added a line in alsa config file seems to add a sound card. The fact is that it's adding the wrong one.
+
+3) I also manually added hw:0,0 (automatically detected by module-udev-detect) in pulse configuration adding
+
+	load-module module-alsa-source device=hw:1,0
+
+A thread on ALSA in  https://bbs.archlinux.org/viewtopic.php?id=125092 seems to say how to solve this.
+
+Setting manually to load 
+	
+	(pulseaudio config file)
+	load-module module-alsa-source device=hw:0,0 
+	
+	(pulseaudio config file)
+	nothing, removed the line  "options snd-hda-intel model=generic"
+
+seems to use the microphone to do stuff, including output.
+
+So i try to get the mic working. On https://wiki.archlinux.org/title/Advanced_Linux_Sound_Architecture/Troubleshooting#Microphone
+I found that adding 
+
+	options snd-hda-intel enable_msi=1
+	
+to /etc/modprobe.d/snd-hda-intel.conf should fix the issue. But it doesnt.
+
+
+
+Found that 
+
+	alsactl init
+	and
+	alsactl restore
+	
+give information about errors during hardware loading.
+
+
+I think that adding myself to the audio group is the first thing i have done, but i repeated
+
+usermod -a -G audio djanloo
+
+4)Tried blacklisting mic, failed.
+
+
+5) Tried adding in alsa config file:
+
+	options snd-hda-intel index=1,0
+
+as suggested in https://bbs.archlinux.org/viewtopic.php?id=186597.
+
+During alsa force-reload, unloading modules get stuck at snd-rn-pci-acp3x driver.
+
+Interestingly enough, I get
+
+	$ lsmod | grep snd_rn_pci_acp3x
+	
+	snd_rn_pci_acp3x       20480  -1
+	snd_acp_config         16384  1 snd_rn_pci_acp3x
+
+which means that the driver is not used by anyone.
+
+Furthermore
+
+$ pacmd list-cards
+1 card(s) available.
+    index: 0
+	name: <alsa_card.pci-0000_03_00.1>
+	driver: <module-alsa-card.c>
+	owner module: 7
+	properties:
+		alsa.card = "1"
+		alsa.card_name = "HD-Audio Generic"
+		alsa.long_card_name = "HD-Audio Generic at 0xd03c0000 irq 71"
+		alsa.driver_name = "snd_hda_intel"
+		device.bus_path = "pci-0000:03:00.1"
+		sysfs.path = "/devices/pci0000:00/0000:00:08.1/0000:03:00.1/sound/card1"
+		device.bus = "pci"
+		device.vendor.id = "1002"
+		device.vendor.name = "Advanced Micro Devices, Inc. [AMD/ATI]"
+		device.product.id = "1637"
+		device.product.name = "Renoir Radeon High Definition Audio Controller"
+		device.string = "1"
+		device.description = "Renoir Radeon High Definition Audio Controller"
+		module-udev-detect.discovered = "1"
+		device.icon_name = "audio-card-pci"
+	profiles:
+		output:hdmi-stereo: Digital Stereo (HDMI) Output (priority 5900, available: no)
+		output:hdmi-surround: Digital Surround 5.1 (HDMI) Output (priority 800, available: no)
+		output:hdmi-surround71: Digital Surround 7.1 (HDMI) Output (priority 800, available: no)
+		off: Off (priority 0, available: unknown)
+	active profile: <off>
+	ports:
+		hdmi-output-0: HDMI / DisplayPort (priority 5900, latency offset 0 usec, available: no)
+			properties:
+				device.icon_name = "video-display"
+
+
+This confirms that pulseaudio can't see nothing
+
+5) Finally some explicit references to analog device appeared restarting pulseaudio with high verbosity:
+
+	$ pulseaudio -vvvv
+
+	[...]
+	I: [pulseaudio] (alsa-lib)main.c: error: failed to import hw:1 use case configuration -6
+	I: [pulseaudio] (alsa-lib)parser.c: UCM is not supported for this HDA model (HD-Audio Generic at 0xd03c0000 irq 71)
+	I: [pulseaudio] (alsa-lib)main.c: error: failed to import HD-Audio Generic use case configuration -6
+	I: [pulseaudio] alsa-ucm.c: UCM not available for card HD-Audio Generic
+	D: [pulseaudio] conf-parser.c: Parsing configuration file '/usr/share/pulseaudio/alsa-mixer/profile-sets/default.conf'
+	D: [pulseaudio] alsa-mixer.c: Looking at profile input:analog-stereo
+	D: [pulseaudio] alsa-mixer.c: Checking for recording on Analog Stereo (analog-stereo)
+	D: [pulseaudio] alsa-util.c: Trying front:1 with SND_PCM_NO_AUTO_FORMAT ...
+	I: [pulseaudio] (alsa-lib)pcm_hw.c: open '/dev/snd/pcmC1D0c' failed (-2)
+	I: [pulseaudio] alsa-util.c: Error opening PCM device front:1: No such file or directory
+	D: [pulseaudio] alsa-mixer.c: Caching failure to open input:analog-stereo
+	D: [pulseaudio] alsa-mixer.c: Looking at profile input:iec958-stereo
+	D: [pulseaudio] alsa-mixer.c: Checking for recording on Digital Stereo (IEC958) (iec958-stereo)
+	D: [pulseaudio] alsa-util.c: Trying iec958:1 with SND_PCM_NO_AUTO_FORMAT ...
+	[...]
+
+from which it seems that UCM is not provided for my audio card.
+
+6) Then I found out that is a bad idea to have a user in the audio group (https://wiki.ubuntu.com/Audio/TheAudioGroup) and deleted myself with 
+
+	sudo deluser djanloo audio
+
+I deleted the config files for pulseaudio at ~/.config/pulse.
+Now the pulseaudio startup log doesn't seem to have problems in finding the analog.
+Still have a 
+	
+	Failed to load module "module-native-protocol-unix" (argument: ""): initialization failed.
+
+7) Tried adding myself to the pulse group. Nothing changed.
+
+8) Discovered that the analog package has nothing to do with sound.
+
+9) Started following the ubuntu sound troubleshooting guide and done
+
+sudo apt-get update;sudo apt-get dist-upgrade; sudo apt-get install pavucontrol linux-sound-base alsa-base alsa-utils gdm3 ubuntu-desktop  linux-image-`uname -r` libasound2; sudo apt-get -y --reinstall install linux-sound-base alsa-base alsa-utils gdm3 ubuntu-desktop  linux-image-`uname -r` libasound2; killall pulseaudio; rm -r ~/.pulse*; ubuntu-support-status || ubuntu-security-status; sudo usermod -aG `cat /etc/group | grep -e '^pulse:' -e '^audio:' -e '^pulse-access:' -e '^pulse-rt:' -e '^video:' | awk -F: '{print $1}' | tr '\n' ',' | sed 's:,$::g'` `whoami`
+
+Since it created problems on kernel 5.18 I switched to 5.15.0-27-generic and seemed to work.
+
+Maybe accidentally deleted alsa-base.conf file while trying to purge.
+
+10)Executed
+
+cat /proc/asound/{version,cards,devices,hwdep,pcm,seq/clients}; ls -l /usr/share/pulseaudio/alsa-mixer/paths/; sudo rm /etc/asound.conf; sudo rm -r ~/.pulse ~/.asound* ;sudo rm ~/.pulse-cookie; sudo apt-get update; sudo apt-get install aptitude; sudo aptitude install paman gnome-alsamixer libasound2-plugins padevchooser libsdl1.2debian-pulseaudio; sudo lshw -short;ls -lart /dev/snd; find /lib/modules/`uname -r` | grep snd ;cat /dev/sndstat; lspci -nn; lsusb; sudo which alsactl; sudo fuser -v /dev/dsp /dev/snd/* ; dpkg -S bin/slmodemd; dmesg | egrep 'EMU|probe|emu|ALSA|alsa|ac97|udi|snd|ound|irmware'; sudo systemctl list-units |egrep 'EMU|probe|emu|ALSA|alsa|ac97|udi|snd|ound|irmware|bcm|card|Card'; sudo /etc/init.d/sl-modem-daemon status; sudo grep model /etc/modprobe.d/* ; sudo dmidecode|egrep 'anufact|roduct|erial|elease'; lsmod | egrep 'snd|usb|midi|udio'; pacmd list-sinks; aplay -l; sudo alsa force-reload; ubuntu-support-status || ubuntu-security-status ; sudo lshw -C sound
+
+This gave problems in
+
+	sudo alsa force-reload 
+	
+since this command freezes when unloadings nd-pci-acp3x. 
+
+I realized that this guide seems pretty old, stopped following it.
+
+11) Added 
+
+	#DJANLOO
+	blacklist snd-rn-pci-acp3x
+	
+in /etc/modprobe.d/blacklist.conf ans suggested in https://forums.lenovo.com/t5/ThinkPad-T400-T500-and-newer-T-series-Laptops/T14s-AMD-no-HDMI-audio-on-Linux/m-p/5081195?page=7
+
+now alsa force-reload seems to work. Still I have only one device listed in aplay -l.
+
+Then added 
+	
+	snd-acp3x-pdm-dma
+
+in /etc/modules-load.d/audio.conf.
+
+Next step would be to manually do 
+
+	modprobe snd-rn-pci-acp3x
+	
+to get the mic working. Naturally this entire procedure does not work.
+
+
+12) Completely random uninstalled pipewire
+
+

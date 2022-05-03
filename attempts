@@ -277,6 +277,11 @@ $ cat /proc/asound/devices
 This setup raises a lot of errors but seems to improve the situation.
 Direct references to analog stuff.
 
+15) Tried adding
+	
+	alsa: options snd-intel-dspcfg dsp_driver=1
+	
+but it does nothing.
 	
 
 

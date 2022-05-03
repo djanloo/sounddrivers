@@ -234,3 +234,9 @@ https://www.dell.com/support/kbdoc/it-it/000146175/installing-and-configuring-am
 I probably found this file here: http://repo.radeon.com/amdgpu-install/latest/
 
 the keyword is amdgpu-install.
+
+13) 	GRUB: 	amd_iommu=on
+	alsa: 	load-module module-alsa-sink
+		load-module module-alsa-source device=hw:1,0 <-- change this to 0,0
+
+https://www.reddit.com/r/Kubuntu/comments/ji129d/kubuntu_2010_amd_renoir_ryzen_4500u_no_audio/

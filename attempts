@@ -236,7 +236,7 @@ I probably found this file here: http://repo.radeon.com/amdgpu-install/latest/
 the keyword is amdgpu-install.
 
 13) 	GRUB: 	amd_iommu=on
-	alsa: 	load-module module-alsa-sink
+	pulse: 	load-module module-alsa-sink
 		load-module module-alsa-source device=hw:1,0 <-- change this to 0,0
 
 https://www.reddit.com/r/Kubuntu/comments/ji129d/kubuntu_2010_amd_renoir_ryzen_4500u_no_audio/
@@ -269,6 +269,15 @@ $ cat /proc/asound/devices
   6: [ 1]   : control
  33:        : timer
 
+14) 	GRUB -> IOMMU
+	pulse -> manual load
+	alsa: 	options snd-hda-intel dmic_detect=0
+		blacklist snd_soc_skl
+	
+This setup raises a lot of errors but seems to improve the situation.
+Direct references to analog stuff.
+
+	
 
 
 

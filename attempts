@@ -240,3 +240,35 @@ the keyword is amdgpu-install.
 		load-module module-alsa-source device=hw:1,0 <-- change this to 0,0
 
 https://www.reddit.com/r/Kubuntu/comments/ji129d/kubuntu_2010_amd_renoir_ryzen_4500u_no_audio/
+I manage to discover that
+
+$ cat /proc/asound/devices
+  1:        : sequencer
+  2: [ 0- 0]: digital audio capture  <--------- this is the microphone:  device=hw:0,0 (but it is variable)
+  3: [ 0]   : control
+  4: [ 1- 3]: digital audio playback <--------- I don't know what it is
+  5: [ 1- 0]: hardware dependent
+  6: [ 1]   : control
+ 33:        : timer
+
+so I added manual import of the device in pulseaudio:
+
+	load-module module-alsa-sink device=hw:1,3
+	load-module module-alsa-source device=hw:0,0
+
+And this makes BOTH THE RADEON AND THE MIC APPEAR.
+	
+
+After just a while (probably after alsa force-reload) the order is again flipped, so it is not working:
+$ cat /proc/asound/devices
+ 1:        : sequencer
+  2: [ 0- 3]: digital audio playback
+  3: [ 0- 0]: hardware dependent
+  4: [ 0]   : control
+  5: [ 1- 0]: digital audio capture
+  6: [ 1]   : control
+ 33:        : timer
+
+
+
+

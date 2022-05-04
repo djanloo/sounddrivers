@@ -283,6 +283,10 @@ Direct references to analog stuff.
 	
 but it does nothing.
 	
+16) installed amdgpu by
 
+	sudo install amdgpu
+	
+(haven't tried yet because it seemed impossible)
 
 

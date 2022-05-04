@@ -288,5 +288,7 @@ but it does nothing.
 	sudo install amdgpu
 	
 (haven't tried yet because it seemed impossible)
+Aaaaaaaand indeed it is, since it does not install it correctly.
 
+I don't know what to do more than this.
 
